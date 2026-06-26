@@ -1,0 +1,2395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CTS Intelligence Core</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/* ============================================================
+   CTS Intelligence Core — Monochrome Editorial + Blue Accent
+   Palette: Grey/Black/White + #066CF4 accent
+   Font: Arimo
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* Monochrome base */
+  --bg: #E0E0E0;
+  --surface: #C8C8C8;
+  --surface-2: #B8B8B8;
+  --surface-3: #AEAEAE;
+  --border: #A8A8A8;
+  --border-hover: #999999;
+
+  /* Text hierarchy */
+  --text: #1A1A1A;
+  --text-secondary: #333333;
+  --muted: #777777;
+  --quiet: #AAAAAA;
+
+  /* Accent — CTS Blue (used sparingly) */
+  --accent: #066CF4;
+  --accent-soft: rgba(6, 108, 244, 0.08);
+  --accent-hover: #055BD4;
+  --accent-text: #066CF4;
+
+  /* Status — grayscale with blue accent */
+  --critical: #1A1A1A;
+  --high: #333333;
+  --medium: #666666;
+  --low: #999999;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* Typography */
+  --font-sans: 'Arimo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  /* Spacing */
+  --radius: 4px;
+  --radius-lg: 6px;
+
+  font-family: var(--font-sans);
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button { cursor: pointer; }
+input[type="checkbox"] { accent-color: var(--accent); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CCC; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #AAA; }
+
+/* ============================================================
+   Layout
+   ============================================================ */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Sidebar — Dark Charcoal
+   ============================================================ */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px 14px;
+  background: #1A1A1A;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-text strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+}
+
+.brand-text span {
+  display: block;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Navigation */
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+}
+
+.nav-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 14px 8px 5px;
+}
+
+.nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  font-family: var(--font-sans);
+  transition: all 0.1s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-item.active {
+  background: var(--accent);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.nav-item svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+/* Sidebar footer */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.status-indicator { width: 6px; height: 6px; flex-shrink: 0; margin-top: 4px; }
+
+.status-pulse {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(6, 108, 244, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(6, 108, 244, 0.5); }
+  70% { box-shadow: 0 0 0 4px rgba(6, 108, 244, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(6, 108, 244, 0); }
+}
+
+.status-card strong { display: block; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.8); }
+.status-card p { font-size: 9px; color: rgba(255, 255, 255, 0.4); margin-top: 1px; }
+
+.sidebar-integrity {
+  padding: 10px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-integrity .side-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.sidebar-integrity p {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.4;
+  margin-bottom: 3px;
+}
+
+.sidebar-integrity strong {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.version-tag {
+  text-align: center;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.25);
+  margin-top: 10px;
+  font-family: var(--font-mono);
+}
+
+/* ============================================================
+   Workspace
+   ============================================================ */
+
+.workspace {
+  min-width: 0;
+  padding: 24px 32px 40px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.top-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.search-box {
+  width: min(260px, 28vw);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.search-box:focus-within { border-color: var(--accent); }
+
+.search-box input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.search-box input::placeholder { color: var(--quiet); }
+.primary-button,
+.ghost-button,
+.icon-button {
+  height: 32px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 12px;
+  font-family: var(--font-sans);
+  transition: all 0.1s ease;
+}
+
+.primary-button {
+  background: var(--text);
+  border: 1px solid var(--text);
+  color: #FFFFFF;
+}
+
+.primary-button:hover { background: #000000; }
+
+.ghost-button {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.ghost-button:hover { background: var(--surface-3); border-color: var(--border-hover); }
+
+.icon-button {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.icon-button:hover { background: var(--surface-3); }
+
+/* Notice */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.notice svg { flex-shrink: 0; margin-top: 1px; stroke: var(--accent); }
+.notice strong { color: var(--text); }
+
+/* Views */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.15s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ============================================================
+   Cards — Clean White on Grey
+   ============================================================ */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* ============================================================
+   Metric Cards
+   ============================================================ */
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.metric-icon.blue { color: var(--accent); }
+.metric-icon.amber { color: var(--text-secondary); }
+.metric-icon.violet { color: var(--text); }
+.metric-icon.green { color: var(--text-secondary); }
+
+.metric-icon svg { stroke: currentColor; stroke-width: 1.8; }
+
+.metric-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.metric-body strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 2px 0 1px;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.metric-delta { font-size: 10px; color: var(--muted); }
+.metric-delta.positive { color: var(--text-secondary); }
+.metric-delta.warning { color: var(--text-secondary); }
+
+/* ============================================================
+   Dashboard Grid
+   ============================================================ */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.span-2 { grid-column: span 2; }
+
+/* Pipeline */
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.pipeline-step {
+  flex: 1;
+  min-width: 85px;
+  padding: 12px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.step-number {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  background: var(--text);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.pipeline-step strong { display: block; font-size: 11px; font-weight: 700; margin-bottom: 2px; }
+.pipeline-step small { display: block; font-size: 9px; color: var(--muted); line-height: 1.3; }
+
+.pipeline-connector {
+  width: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pipeline-connector::before { content: ''; width: 100%; height: 1px; background: var(--border); }
+
+.pipeline-connector::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  width: 0;
+  height: 0;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 4px solid var(--border);
+}
+
+/* Threat Radar */
+.threat-radar {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.radar-svg { width: 100%; height: 100%; }
+.radar-svg polygon { stroke: var(--border); }
+.radar-svg line { stroke: var(--border); }
+
+.radar-labels { position: absolute; inset: 0; pointer-events: none; }
+.radar-labels span { position: absolute; font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.rl-top { top: 2%; left: 50%; transform: translateX(-50%); }
+.rl-right { top: 34%; right: 0; }
+.rl-bottom-right { bottom: 10%; right: 6%; }
+.rl-bottom-left { bottom: 10%; left: 6%; }
+.rl-left { top: 34%; left: 0; }
+
+/* Alert Feed */
+.alert-feed { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+.alert-feed li {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.alert-feed li::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.alert-feed li.high::before { background: var(--accent); }
+
+.alert-feed strong { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.alert-feed span { display: block; font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+/* Activity Feed */
+.activity-feed { display: flex; flex-direction: column; gap: 8px; }
+
+.activity-item { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+
+.activity-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text);
+  flex-shrink: 0;
+}
+
+.activity-item span { color: var(--text-secondary); }
+
+.activity-item time {
+  margin-left: auto;
+  color: var(--quiet);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* Readiness */
+.readiness-grid { display: flex; flex-direction: column; gap: 12px; }
+
+.readiness-item { display: flex; flex-direction: column; gap: 4px; }
+
+.readiness-info { display: flex; justify-content: space-between; align-items: center; }
+.readiness-info strong { font-size: 11px; font-weight: 600; }
+.readiness-info span { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+
+.progress-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--text);
+  transition: width 0.5s ease;
+}
+
+/* Fusion bars on darker background */
+.fusion-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.fusion-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+/* ============================================================
+   Split Layout
+   ============================================================ */
+
+.split-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.2fr);
+  gap: 10px;
+}
+
+/* ============================================================
+   Forms
+   ============================================================ */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field span {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.1s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus { border-color: var(--accent); }
+
+.form-field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23777' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.form-field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+
+.full { grid-column: 1 / -1; }
+
+/* Packet Result */
+.packet-result {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.packet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.packet-row span { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.packet-row strong { font-size: 11px; font-family: var(--font-mono); color: var(--text); }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1;
+  min-height: 160px;
+  text-align: center;
+}
+
+.empty-state p {
+  font-size: 12px;
+  color: var(--quiet);
+  max-width: 240px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Ledger Table
+   ============================================================ */
+
+.filter-tabs { display: flex; gap: 3px; }
+
+.filter-tabs button {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: all 0.1s ease;
+}
+
+.filter-tabs button:hover { color: var(--text-secondary); background: var(--surface-3); }
+
+.filter-tabs button.active {
+  background: var(--text);
+  color: #FFFFFF;
+  border-color: var(--text);
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+th, td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+th {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+td { color: var(--text-secondary); }
+tr:hover td { background: var(--surface-2); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   SACS Compiler
+   ============================================================ */
+
+.compiler-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.sacs-output {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  border: 1px solid rgba(6, 108, 244, 0.2);
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+
+.sacs-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.route-card {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  margin-bottom: 12px;
+}
+
+.route-card strong { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 3px; }
+.route-card span { font-size: 11px; color: var(--text-secondary); }
+
+.sacs-segments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.segment {
+  padding: 8px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.segment span {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.segment strong { font-size: 11px; font-family: var(--font-mono); color: var(--text); }
+
+/* ============================================================
+   Fusion
+   ============================================================ */
+
+.fusion-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.fusion-node {
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.fusion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.fusion-header strong { font-size: 11px; font-weight: 700; }
+
+.fusion-score {
+  font-size: 12px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+.fusion-desc { display: block; font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+
+.convergence-profile {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+
+.convergence-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.convergence-header strong { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text); }
+.convergence-profile p { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ============================================================
+   Risk Board
+   ============================================================ */
+
+.risk-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.risk-card {
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.risk-card[data-level="High"] { border-left: 3px solid var(--accent); }
+
+.risk-card strong { display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.risk-card .pill { margin-bottom: 6px; }
+.risk-card > span { display: block; font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.toggle input { width: 13px; height: 13px; }
+
+/* ============================================================
+   Briefs
+   ============================================================ */
+
+.brief-list { display: flex; flex-direction: column; gap: 4px; }
+
+.brief-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: all 0.1s ease;
+}
+
+.brief-item:hover { border-color: var(--border-hover); }
+.brief-item.active { border-color: var(--accent); border-left: 3px solid var(--accent); }
+
+.brief-item strong { display: block; font-size: 12px; font-weight: 600; }
+.brief-item span { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.brief-preview h3 {
+  margin: 14px 0 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.brief-preview h3:first-child { margin-top: 0; }
+.brief-preview p, .brief-preview li { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+.brief-preview ul { padding-left: 16px; margin: 0; }
+.brief-preview li { margin-bottom: 3px; }
+
+/* ============================================================
+   Zero Trust Loop
+   ============================================================ */
+
+.loop-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.loop-visual {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.loop-svg { width: 100%; height: 100%; }
+.loop-svg circle { stroke: var(--border); }
+
+.loop-center {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.loop-center strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+.loop-center span {
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.loop-events { display: grid; gap: 6px; }
+
+.loop-event {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.loop-event strong { display: block; font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+.loop-event span { font-size: 10px; color: var(--muted); }
+
+/* ============================================================
+   Identity
+   ============================================================ */
+
+.identity-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.identity-avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--text);
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.identity-subtitle { font-size: 10px; color: var(--muted); }
+
+.shield-score {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+.shield-score span { font-size: 10px; color: var(--muted); }
+.shield-elevated { font-size: 11px; font-weight: 700; color: var(--accent); }
+
+.protection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.protection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+  font-family: var(--font-sans);
+  transition: all 0.1s ease;
+}
+
+.protection:hover { border-color: var(--border-hover); }
+.protection.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.protection svg { stroke: currentColor; stroke-width: 1.8; }
+
+/* ============================================================
+   Roadmap Timeline
+   ============================================================ */
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.phase {
+  position: relative;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.phase-marker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-bottom: 10px;
+}
+
+.phase span { font-size: 10px; font-weight: 700; color: var(--accent); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.04em; }
+.phase strong { display: block; font-size: 15px; font-weight: 700; margin: 6px 0 10px; }
+
+.phase-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+
+.phase-list li {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding-left: 10px;
+  position: relative;
+  line-height: 1.4;
+}
+
+.phase-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+/* ============================================================
+   Dialog
+   ============================================================ */
+
+dialog { border: 0; padding: 0; background: transparent; color: var(--text); }
+dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+
+.dialog-card {
+  width: min(360px, calc(100vw - 32px));
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog-card h2 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.dialog-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+.dialog-card menu {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  .app-shell { grid-template-columns: 60px minmax(0, 1fr); }
+  .sidebar { padding: 14px 6px; }
+  .brand-text, .nav-item span, .nav-section-label, .sidebar-footer, .sidebar-integrity { display: none; }
+  .nav-item { justify-content: center; padding: 8px; }
+  .metric-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+  .span-2 { grid-column: span 2; }
+  .fusion-grid { grid-template-columns: repeat(3, 1fr); }
+  .loop-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .app-shell { display: block; }
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+  .brand { border-bottom: 0; margin-bottom: 6px; padding-bottom: 0; }
+  .nav-list { flex-direction: row; flex-wrap: wrap; gap: 3px; }
+  .nav-section-label { display: none; }
+  .nav-item { width: auto; padding: 6px 8px; font-size: 10px; }
+  .nav-item span { display: inline; }
+  .topbar { flex-direction: column; align-items: stretch; }
+  .top-actions { flex-wrap: wrap; }
+  .search-box { width: 100%; }
+  .metric-grid, .dashboard-grid, .split-layout, .risk-board, .form-grid,
+  .compiler-grid, .protection-grid, .timeline, .fusion-grid { grid-template-columns: 1fr; }
+  .span-2, .full { grid-column: auto; }
+  .pipeline { flex-direction: column; }
+  .pipeline-connector { width: auto; height: 10px; }
+  .pipeline-connector::before { width: 1px; height: 100%; }
+}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" aria-label="Primary">
+      <div class="brand">
+        <div class="brand-mark">
+          <img src="logo.png" alt="CTS Logo">
+        </div>
+        <div class="brand-text">
+          <strong>Central Trust Securities</strong>
+          <span>Intelligence Core</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <div class="nav-section-label">Operations</div>
+        <button class="nav-item active" data-view="dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="intake">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Intake</span>
+        </button>
+        <button class="nav-item" data-view="ledger">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <span>Ledger</span>
+        </button>
+
+        <div class="nav-section-label">Analysis</div>
+        <button class="nav-item" data-view="sacs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/></svg>
+          <span>SACS</span>
+        </button>
+        <button class="nav-item" data-view="fusion">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          <span>Fusion</span>
+        </button>
+        <button class="nav-item" data-view="risk">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Risk</span>
+        </button>
+        <button class="nav-item" data-view="briefs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Briefs</span>
+        </button>
+
+        <div class="nav-section-label">Security</div>
+        <button class="nav-item" data-view="zerotrust">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Zero Trust</span>
+        </button>
+        <button class="nav-item" data-view="identity">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Identity</span>
+        </button>
+
+        <div class="nav-section-label">Planning</div>
+        <button class="nav-item" data-view="roadmap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Roadmap</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-card">
+          <div class="status-indicator">
+            <span class="status-pulse"></span>
+          </div>
+          <div>
+            <strong>Simulation Mode</strong>
+            <p>No live data connections</p>
+          </div>
+        </div>
+        <div class="sidebar-integrity">
+          <span class="side-label">Systemic Design Integrity</span>
+          <p><strong>Shield:</strong> Perimeter Defense &amp; Fiduciary Custody.</p>
+          <p><strong>∮F·dr = 0:</strong> Closed-Loop Zero-Trust Auditing.</p>
+          <p><strong>Central Axes:</strong> Multi-Context Vector Auth.</p>
+        </div>
+        <div class="version-tag">v0.9.1 Prototype</div>
+      </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <p class="eyebrow" id="view-eyebrow">Phase I Prototype</p>
+          <h1 id="view-title">Command Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <label class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="globalSearch" type="search" placeholder="Search records...">
+          </label>
+          <button class="icon-button" id="simulateBtn" title="Simulate new telemetry">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          </button>
+          <button class="primary-button" id="newIntakeBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New Intake
+          </button>
+        </div>
+      </header>
+
+      <section class="notice" id="simNotice">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span><strong>Mockup only.</strong> This prototype visualizes the CTS Intelligence Core. It does not perform investigations, identity checks, cryptographic anchoring, or live monitoring.</span>
+      </section>
+
+      <!-- DASHBOARD VIEW -->
+      <section class="view active" id="dashboard">
+        <div class="metric-grid">
+          <article class="metric-card">
+            <div class="metric-icon blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-label">Ledger Entries</span>
+              <strong id="ledgerCount">128</strong>
+              <small class="metric-delta positive">+4 today</small>
+            </div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon amber">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-label">Open Alerts</span>
+              <strong id="alertCount">9</strong>
+              <small class="metric-delta warning">3 high priority</small>
+            </div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon violet">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-label">Integrity Loop</span>
+              <strong id="loopScore">0.018</strong>
+              <small class="metric-delta">Within threshold</small>
+            </div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-icon green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="metric-body">
+              <span class="metric-label">Briefs Pending</span>
+              <strong>6</strong>
+              <small class="metric-delta">2 awaiting director review</small>
+            </div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="card span-2">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">End-to-End Flow</p>
+                <h2>Intelligence Core Pipeline</h2>
+              </div>
+              <button class="ghost-button" data-view-jump="intake">Open Intake</button>
+            </div>
+            <div class="pipeline">
+              <div class="pipeline-step">
+                <div class="step-number">1</div>
+                <strong>Ingest</strong>
+                <small>Documents, telemetry, statements</small>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="step-number">2</div>
+                <strong>Hash</strong>
+                <small>SHA-256 anchor</small>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="step-number">3</div>
+                <strong>SACS</strong>
+                <small>Authority-stratum classification</small>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="step-number">4</div>
+                <strong>Ledger</strong>
+                <small>Immutable event trail</small>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="step-number">5</div>
+                <strong>Fusion</strong>
+                <small>Threat convergence profile</small>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="step-number">6</div>
+                <strong>Brief</strong>
+                <small>Actionable matrix output</small>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Vector Mix</p>
+                <h2>Threat Domains</h2>
+              </div>
+            </div>
+            <div class="threat-radar" aria-label="Threat domain visualization">
+              <svg viewBox="0 0 200 200" class="radar-svg">
+                <polygon points="100,20 176,60 176,140 100,180 24,140 24,60" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+                <polygon points="100,40 156,68 156,132 100,160 44,132 44,68" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+                <polygon points="100,60 136,76 136,124 100,140 64,124 64,76" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+                <line x1="100" y1="20" x2="100" y2="180" stroke="var(--border)" stroke-width="0.3"/>
+                <line x1="24" y1="60" x2="176" y2="140" stroke="var(--border)" stroke-width="0.3"/>
+                <line x1="176" y1="60" x2="24" y2="140" stroke="var(--border)" stroke-width="0.3"/>
+                <polygon points="100,32 162,66 148,138 52,130 36,72" fill="var(--accent)" fill-opacity="0.15" stroke="var(--accent)" stroke-width="1.5"/>
+                <circle cx="100" cy="32" r="3" fill="var(--accent)"/>
+                <circle cx="162" cy="66" r="3" fill="var(--accent)"/>
+                <circle cx="148" cy="138" r="3" fill="var(--accent)"/>
+                <circle cx="52" cy="130" r="3" fill="var(--accent)"/>
+                <circle cx="36" cy="72" r="3" fill="var(--accent)"/>
+              </svg>
+              <div class="radar-labels">
+                <span class="rl-top">Cyber</span>
+                <span class="rl-right">EM/RF</span>
+                <span class="rl-bottom-right">Institutional</span>
+                <span class="rl-bottom-left">Physical</span>
+                <span class="rl-left">Identity</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Current Alerts</p>
+                <h2>Convergence Watch</h2>
+              </div>
+            </div>
+            <ul class="alert-feed" id="dashboardAlerts"></ul>
+          </article>
+
+          <article class="card span-2">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Operations</p>
+                <h2>Division Readiness</h2>
+              </div>
+            </div>
+            <div class="readiness-grid">
+              <div class="readiness-item">
+                <div class="readiness-info">
+                  <strong>Protective Intelligence</strong>
+                  <span>58%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width:58%; background: var(--accent)"></div>
+                </div>
+              </div>
+              <div class="readiness-item">
+                <div class="readiness-info">
+                  <strong>Custodial Governance</strong>
+                  <span>72%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width:72%; background: var(--blue)"></div>
+                </div>
+              </div>
+              <div class="readiness-item">
+                <div class="readiness-info">
+                  <strong>Continuum Security</strong>
+                  <span>43%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width:43%; background: var(--amber)"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Activity</p>
+                <h2>Recent Events</h2>
+              </div>
+            </div>
+            <div class="activity-feed" id="activityFeed"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- INTAKE VIEW -->
+      <section class="view" id="intake">
+        <div class="split-layout">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">IINP</p>
+                <h2>New Intelligence Intake</h2>
+              </div>
+            </div>
+            <form id="intakeForm" class="form-grid">
+              <label class="form-field">
+                <span>Source Type</span>
+                <select id="sourceType">
+                  <option>Vault document</option>
+                  <option>SACS incident log</option>
+                  <option>EM/RF scan</option>
+                  <option>Device log</option>
+                  <option>External agency report</option>
+                  <option>Witness statement</option>
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Subject</span>
+                <input id="subject" value="Institutional response anomaly">
+              </label>
+              <label class="form-field">
+                <span>Threat Vector</span>
+                <select id="vector">
+                  <option>Institutional</option>
+                  <option>Cyber</option>
+                  <option>EM/RF</option>
+                  <option>Identity</option>
+                  <option>Physical</option>
+                  <option>Psychological</option>
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Risk Level</span>
+                <select id="riskLevel">
+                  <option>Moderate</option>
+                  <option>High</option>
+                  <option>Critical</option>
+                  <option>Low</option>
+                </select>
+              </label>
+              <label class="form-field full">
+                <span>Analyst Notes</span>
+                <textarea id="notes">Mock source packet received for normalization and routing.</textarea>
+              </label>
+              <button class="primary-button full" type="submit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Run Intake Pipeline
+              </button>
+            </form>
+          </article>
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Pipeline Result</p>
+                <h2>Normalized Packet</h2>
+              </div>
+            </div>
+            <div class="packet-result" id="packetResult">
+              <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <p>Submit the form to generate a mock hash, SACS code, ledger anchor, and routing decision.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- LEDGER VIEW -->
+      <section class="view" id="ledger">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">G-PCL</p>
+              <h2>Global Provenance &amp; Custodial Ledger</h2>
+            </div>
+            <div class="filter-tabs" role="tablist">
+              <button class="active" data-ledger-filter="all">All</button>
+              <button data-ledger-filter="Document">Documents</button>
+              <button data-ledger-filter="Incident">Incidents</button>
+              <button data-ledger-filter="Brief">Briefs</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>UTC Marker</th>
+                  <th>Type</th>
+                  <th>SACS Code</th>
+                  <th>Hash</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="ledgerRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SACS VIEW -->
+      <section class="view" id="sacs">
+        <div class="split-layout">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">S-SIE</p>
+                <h2>SACS Compiler</h2>
+              </div>
+            </div>
+            <div class="compiler-grid">
+              <label class="form-field">
+                <span>System</span>
+                <select id="sacsSystem"><option>CTS</option><option>JUD</option><option>HLT</option><option>FIN</option></select>
+              </label>
+              <label class="form-field">
+                <span>Domain</span>
+                <select id="sacsDomain"><option>GOV</option><option>CYB</option><option>EMR</option><option>IDV</option></select>
+              </label>
+              <label class="form-field">
+                <span>Role</span>
+                <select id="sacsRole"><option>AUTH</option><option>CUST</option><option>EXT</option><option>SUBJ</option></select>
+              </label>
+              <label class="form-field">
+                <span>Function</span>
+                <select id="sacsFunction"><option>RESP</option><option>VERIFY</option><option>ROUTE</option><option>ESCAL</option></select>
+              </label>
+              <label class="form-field">
+                <span>Risk</span>
+                <select id="sacsRisk"><option>C2</option><option>C3</option><option>C4</option><option>C1</option></select>
+              </label>
+              <label class="form-field">
+                <span>Failure Mode</span>
+                <select id="sacsFailure"><option>FM-GAP</option><option>FM-DELAY</option><option>FM-DENY</option><option>FM-NONE</option></select>
+              </label>
+            </div>
+            <button class="primary-button" id="compileSacs" style="margin-top:16px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/></svg>
+              Compile Code
+            </button>
+          </article>
+          <article class="card code-card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Deterministic Output</p>
+                <h2>SACS Code</h2>
+              </div>
+            </div>
+            <div class="sacs-output" id="sacsOutput">CTS-GOV-AUTH-RESP-C2-FM-GAP</div>
+            <p class="sacs-desc">This code becomes the foreign key linking case material, ledger entries, risk flags, and briefing outputs.</p>
+            <div class="route-card">
+              <strong>Mock Routing</strong>
+              <span id="sacsRoute">Custodial Governance review, SRPE watchlist</span>
+            </div>
+            <div class="sacs-segments">
+              <div class="segment"><span>System</span><strong id="segSystem">CTS</strong></div>
+              <div class="segment"><span>Domain</span><strong id="segDomain">GOV</strong></div>
+              <div class="segment"><span>Role</span><strong id="segRole">AUTH</strong></div>
+              <div class="segment"><span>Function</span><strong id="segFunction">RESP</strong></div>
+              <div class="segment"><span>Risk</span><strong id="segRisk">C2</strong></div>
+              <div class="segment"><span>Failure</span><strong id="segFailure">FM-GAP</strong></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- FUSION VIEW -->
+      <section class="view" id="fusion">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">MV-TFC</p>
+              <h2>Multi-Vector Threat Fusion Cell</h2>
+            </div>
+            <button class="ghost-button" id="recalcFusion">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              Recalculate
+            </button>
+          </div>
+          <div class="fusion-grid" id="fusionGrid">
+            <div class="fusion-node" data-score="76">
+              <div class="fusion-header"><strong>Cyber</strong><span class="fusion-score">76</span></div>
+              <span class="fusion-desc">Device log anomalies</span>
+              <div class="fusion-bar"><div class="fusion-fill" style="width:76%"></div></div>
+            </div>
+            <div class="fusion-node" data-score="61">
+              <div class="fusion-header"><strong>EM/RF</strong><span class="fusion-score">61</span></div>
+              <span class="fusion-desc">Spectrum variance</span>
+              <div class="fusion-bar"><div class="fusion-fill" style="width:61%"></div></div>
+            </div>
+            <div class="fusion-node" data-score="84">
+              <div class="fusion-header"><strong>Institutional</strong><span class="fusion-score">84</span></div>
+              <span class="fusion-desc">Procedural drift</span>
+              <div class="fusion-bar"><div class="fusion-fill" style="width:84%"></div></div>
+            </div>
+            <div class="fusion-node" data-score="42">
+              <div class="fusion-header"><strong>Physical</strong><span class="fusion-score">42</span></div>
+              <span class="fusion-desc">Site exposure</span>
+              <div class="fusion-bar"><div class="fusion-fill" style="width:42%"></div></div>
+            </div>
+            <div class="fusion-node" data-score="69">
+              <div class="fusion-header"><strong>Identity</strong><span class="fusion-score">69</span></div>
+              <span class="fusion-desc">Context mismatch</span>
+              <div class="fusion-bar"><div class="fusion-fill" style="width:69%"></div></div>
+            </div>
+          </div>
+          <div class="convergence-profile">
+            <div class="convergence-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <strong>Threat Convergence Profile</strong>
+            </div>
+            <p id="fusionSummary">Institutional and cyber vectors are currently driving the highest mock convergence score.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RISK VIEW -->
+      <section class="view" id="risk">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">SRPE</p>
+              <h2>Systemic-Risk Pattern Engine</h2>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="highOnly">
+              <span>High priority only</span>
+            </label>
+          </div>
+          <div class="risk-board" id="riskBoard"></div>
+        </div>
+      </section>
+
+      <!-- BRIEFS VIEW -->
+      <section class="view" id="briefs">
+        <div class="split-layout">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">IBMx</p>
+                <h2>Intelligence Briefing Matrix</h2>
+              </div>
+            </div>
+            <div class="brief-list" id="briefList"></div>
+          </article>
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Draft Preview</p>
+                <h2 id="briefTitle">Select a brief</h2>
+              </div>
+            </div>
+            <div class="brief-preview" id="briefPreview">
+              <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <p>Choose a briefing item to view the dummy nut graf, key judgments, traces, and directives.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ZERO TRUST VIEW -->
+      <section class="view" id="zerotrust">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">CL-ZTIM</p>
+              <h2>Closed-Loop Zero-Trust Integrity Monitor</h2>
+            </div>
+            <button class="ghost-button" id="balanceLoop">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              Balance Loop
+            </button>
+          </div>
+          <div class="loop-layout">
+            <div class="loop-visual">
+              <svg viewBox="0 0 200 200" class="loop-svg">
+                <circle cx="100" cy="100" r="90" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+                <circle cx="100" cy="100" r="70" fill="none" stroke="var(--accent)" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="4 4"/>
+                <circle cx="100" cy="100" r="50" fill="none" stroke="var(--blue)" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="3 3">
+                  <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="20s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="100" cy="100" r="30" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1"/>
+              </svg>
+              <div class="loop-center">
+                <strong id="loopVisualScore">0.018</strong>
+                <span>loop delta</span>
+              </div>
+            </div>
+            <div class="loop-events" id="loopEvents"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- IDENTITY VIEW -->
+      <section class="view" id="identity">
+        <div class="dashboard-grid">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">BIV</p>
+                <h2>Biometric Identity Vault</h2>
+              </div>
+            </div>
+            <div class="identity-card">
+              <div class="identity-avatar">SL</div>
+              <strong>Protected Person Profile</strong>
+              <span class="identity-subtitle">Tokenized identity only</span>
+              <div class="shield-score">
+                <span>Shield Posture</span>
+                <strong class="shield-elevated">Elevated</strong>
+              </div>
+            </div>
+          </article>
+          <article class="card span-2">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">PPIS</p>
+                <h2>Protected-Person Intelligence Shield</h2>
+              </div>
+            </div>
+            <div class="protection-grid">
+              <button class="protection active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Threat scoring
+              </button>
+              <button class="protection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Device exploitation watch
+              </button>
+              <button class="protection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Identity-continuum lock
+              </button>
+              <button class="protection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Institutional manipulation alert
+              </button>
+              <button class="protection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                Counter-surveillance tasking
+              </button>
+              <button class="protection">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                Emergency lockdown drill
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ROADMAP VIEW -->
+      <section class="view" id="roadmap">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">12-36 Month Build</p>
+              <h2>Deployment Roadmap</h2>
+            </div>
+          </div>
+          <div class="timeline">
+            <div class="phase">
+              <div class="phase-marker"></div>
+              <span>0-6 months</span>
+              <strong>Foundation</strong>
+              <ul class="phase-list">
+                <li>Deploy G-PCL ledger</li>
+                <li>Deploy SACS Compiler</li>
+                <li>Zero-Trust baseline</li>
+                <li>Stand up PID (initial)</li>
+                <li>Intelligence Matrix v1</li>
+                <li>Begin EM/cyber forensics lab</li>
+                <li>Identity vault prototype</li>
+              </ul>
+            </div>
+            <div class="phase">
+              <div class="phase-marker"></div>
+              <span>6-18 months</span>
+              <strong>Expansion</strong>
+              <ul class="phase-list">
+                <li>Full MV-TFC activation</li>
+                <li>Identity Vault operational</li>
+                <li>Institutional Case Engine</li>
+                <li>Systemic-Risk Alert Engine</li>
+                <li>Multi-vector telemetry ingestion</li>
+                <li>Governance Structure Mapper</li>
+                <li>Cross-case pattern detection</li>
+              </ul>
+            </div>
+            <div class="phase">
+              <div class="phase-marker"></div>
+              <span>18-36 months</span>
+              <strong>Sovereign Integration</strong>
+              <ul class="phase-list">
+                <li>UN Passport Alliance node</li>
+                <li>Maritime/Aviation gateway security</li>
+                <li>Digital Continuum Vault</li>
+                <li>Global custodial trust operations</li>
+                <li>International intelligence exchange</li>
+                <li>Full contour-integral closed-loop fabric</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- INTAKE DIALOG -->
+  <dialog id="intakeDialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Quick Intake</h2>
+      <p>Jump to the intake screen to generate a normalized intelligence packet.</p>
+      <menu>
+        <button value="cancel" class="ghost-button">Cancel</button>
+        <button value="confirm" class="primary-button">Open Intake</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+  <script>
+/* ============================================================
+   CTS Intelligence Core — Application Logic
+   ============================================================ */
+
+// ── View metadata ──────────────────────────────────────────────
+const viewMeta = {
+  dashboard:  { title: "Command Dashboard",       eyebrow: "Phase I Prototype" },
+  intake:     { title: "Intelligence Intake",      eyebrow: "IINP" },
+  ledger:     { title: "Provenance Ledger",        eyebrow: "G-PCL" },
+  sacs:       { title: "SACS Compiler",            eyebrow: "S-SIE" },
+  fusion:     { title: "Threat Fusion Cell",       eyebrow: "MV-TFC" },
+  risk:       { title: "Systemic Risk",            eyebrow: "SRPE" },
+  briefs:     { title: "Briefing Matrix",          eyebrow: "IBMx" },
+  zerotrust:  { title: "Zero-Trust Monitor",       eyebrow: "CL-ZTIM" },
+  identity:   { title: "Identity Shield",          eyebrow: "BIV / PPIS" },
+  roadmap:    { title: "Deployment Roadmap",       eyebrow: "12-36 Month Build" }
+};
+
+// ── Mock data ──────────────────────────────────────────────────
+const ledgerEntries = [
+  ["2026-06-24T12:44:02Z", "Document", "CTS-GOV-AUTH-RESP-C2-FM-GAP", "9d71c0...b42e", "Anchored"],
+  ["2026-06-24T12:31:19Z", "Incident", "CTS-CYB-EXT-VERIFY-C3-FM-DELAY", "a8f20b...19ac", "Review"],
+  ["2026-06-24T11:58:48Z", "Brief", "CTS-GOV-CUST-ESCAL-C2-FM-GAP", "2c60fe...840a", "Published"],
+  ["2026-06-24T11:22:04Z", "Incident", "CTS-EMR-EXT-ROUTE-C3-FM-NONE", "ef0221...77d0", "Anchored"],
+  ["2026-06-24T10:17:31Z", "Document", "CTS-IDV-CUST-VERIFY-C1-FM-NONE", "7f9a10...381b", "Anchored"],
+  ["2026-06-23T22:08:55Z", "Brief", "CTS-GOV-AUTH-ESCAL-C4-FM-DENY", "431fab...e190", "Director Review"]
+];
+
+const alerts = [
+  { level: "High", text: "Repeated authority-stratum gap across related case packets" },
+  { level: "Moderate", text: "Cyber vector score rose after new device log intake" },
+  { level: "High", text: "Institutional compression factor exceeds mock watch threshold" }
+];
+
+const riskPatterns = [
+  { title: "Authority Misuse Pattern", level: "High", body: "Three C-risk nodes appear across a single procedural chain." },
+  { title: "Evidence Memory Gap", level: "Moderate", body: "Ledger references exist without corresponding narrative detail." },
+  { title: "Cross-Case Delay Cluster", level: "High", body: "Repeated response delays linked by shared role and function codes." },
+  { title: "Identity Context Mismatch", level: "Moderate", body: "Identity token posture changed outside the expected access window." },
+  { title: "Convergence Drift", level: "Low", body: "Threat-vector weights changed but stayed inside the mock baseline." },
+  { title: "Briefing Lag", level: "Moderate", body: "Two matrix drafts have not advanced to action directives." }
+];
+
+const briefs = [
+  {
+    title: "Institutional Response Anomaly",
+    status: "Director review",
+    nut: "A linked set of dummy case events shows delayed response patterns and missing procedural memory.",
+    judgments: [
+      "Risk appears procedural rather than isolated.",
+      "SACS failure mode FM-GAP is the dominant signal.",
+      "Recommended action is governance validation before escalation."
+    ],
+    directives: [
+      "Open CGPD review lane.",
+      "Request corroborating ledger anchors.",
+      "Publish watch summary to Protective Intelligence."
+    ]
+  },
+  {
+    title: "Cyber-Institutional Convergence Watch",
+    status: "Draft",
+    nut: "Mock device logs and institutional timestamps suggest a convergence profile worth analyst review.",
+    judgments: [
+      "Cyber score is elevated but not independently critical.",
+      "Institutional vector increases priority.",
+      "Zero-trust loop remains balanced."
+    ],
+    directives: [
+      "Hold at analyst level.",
+      "Run follow-up intake if new telemetry appears.",
+      "Attach to weekly warning packet."
+    ]
+  },
+  {
+    title: "Protected-Person Shield Posture",
+    status: "Pending action",
+    nut: "Identity-continuum controls remain stable while monitoring posture stays elevated.",
+    judgments: [
+      "No live identity verification is occurring.",
+      "Dummy shield posture is driven by institutional signal weight.",
+      "Emergency lockdown remains a rehearsal-only function."
+    ],
+    directives: [
+      "Keep token state simulated.",
+      "Review device watch queue.",
+      "Log tabletop exercise outcome."
+    ]
+  }
+];
+
+const loopEvents = [
+  { title: "Continuous verification", detail: "All mock sessions refreshed within policy window." },
+  { title: "Micro-segmentation", detail: "No lateral movement path detected in dummy topology." },
+  { title: "Context authentication", detail: "One analyst role requires revalidation." },
+  { title: "Contour delta", detail: "Loop imbalance remains below alert threshold." }
+];
+
+const activityLog = [
+  { text: "Ledger anchor created for document packet", time: "2m ago" },
+  { text: "SACS code compiled: CTS-GOV-AUTH-RESP-C2", time: "8m ago" },
+  { text: "Fusion cell recalculation complete", time: "14m ago" },
+  { text: "New intake from external agency report", time: "22m ago" },
+  { text: "Zero-trust loop balanced", time: "31m ago" },
+  { text: "Briefing matrix draft published", time: "45m ago" }
+];
+
+// ── DOM references ─────────────────────────────────────────────
+const $title = document.querySelector("#view-title");
+const $eyebrow = document.querySelector("#view-eyebrow");
+const $navItems = [...document.querySelectorAll(".nav-item")];
+const $views = [...document.querySelectorAll(".view")];
+
+// ── Navigation ─────────────────────────────────────────────────
+function showView(id) {
+  $navItems.forEach(item => item.classList.toggle("active", item.dataset.view === id));
+  $views.forEach(view => view.classList.toggle("active", view.id === id));
+  const meta = viewMeta[id];
+  if (meta) {
+    $title.textContent = meta.title;
+    $eyebrow.textContent = meta.eyebrow;
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+$navItems.forEach(item => item.addEventListener("click", () => showView(item.dataset.view)));
+document.querySelectorAll("[data-view-jump]").forEach(btn => {
+  btn.addEventListener("click", () => showView(btn.dataset.viewJump));
+});
+
+// ── Render: Alerts ─────────────────────────────────────────────
+function renderAlerts() {
+  const list = document.querySelector("#dashboardAlerts");
+  list.innerHTML = alerts.map(a => `
+    <li class="${a.level === 'High' ? 'high' : ''}">
+      <div>
+        <strong>${a.level} Priority</strong>
+        <span>${a.text}</span>
+      </div>
+    </li>
+  `).join("");
+}
+
+// ── Render: Activity Feed ──────────────────────────────────────
+function renderActivity() {
+  const feed = document.querySelector("#activityFeed");
+  feed.innerHTML = activityLog.map(a => `
+    <div class="activity-item">
+      <div class="activity-dot"></div>
+      <span>${a.text}</span>
+      <time>${a.time}</time>
+    </div>
+  `).join("");
+}
+
+// ── Render: Ledger ─────────────────────────────────────────────
+function renderLedger(filter = "all") {
+  const rows = ledgerEntries
+    .filter(e => filter === "all" || e[1] === filter)
+    .map(e => `
+      <tr>
+        <td style="font-family:var(--font-mono);font-size:12px">${e[0]}</td>
+        <td>${e[1]}</td>
+        <td><span class="pill">${e[2]}</span></td>
+        <td style="font-family:var(--font-mono);font-size:12px">${e[3]}</td>
+        <td>${e[4]}</td>
+      </tr>
+    `).join("");
+  document.querySelector("#ledgerRows").innerHTML = rows || `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">No records match this filter.</td></tr>`;
+}
+
+document.querySelectorAll("[data-ledger-filter]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-ledger-filter]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderLedger(btn.dataset.ledgerFilter);
+  });
+});
+
+// ── Render: Risk Board ─────────────────────────────────────────
+function renderRisks() {
+  const highOnly = document.querySelector("#highOnly").checked;
+  document.querySelector("#riskBoard").innerHTML = riskPatterns
+    .filter(item => !highOnly || item.level === "High")
+    .map(item => `
+      <article class="risk-card" data-level="${item.level}">
+        <strong>${item.title}</strong>
+        <span class="pill" style="${item.level === 'High' ? 'background:var(--red-soft);color:var(--red)' : item.level === 'Low' ? 'background:var(--green-soft);color:var(--green)' : ''}">${item.level}</span>
+        <span>${item.body}</span>
+      </article>
+    `).join("");
+}
+
+document.querySelector("#highOnly").addEventListener("change", renderRisks);
+
+// ── Render: Briefs ─────────────────────────────────────────────
+function renderBriefs() {
+  const list = document.querySelector("#briefList");
+  list.innerHTML = briefs.map((b, i) => `
+    <button class="brief-item" data-brief="${i}">
+      <strong>${b.title}</strong>
+      <span>${b.status}</span>
+    </button>
+  `).join("");
+  list.querySelectorAll(".brief-item").forEach(btn => {
+    btn.addEventListener("click", () => selectBrief(Number(btn.dataset.brief)));
+  });
+}
+
+function selectBrief(index) {
+  const b = briefs[index];
+  document.querySelectorAll(".brief-item").forEach((item, i) => {
+    item.classList.toggle("active", i === index);
+  });
+  document.querySelector("#briefTitle").textContent = b.title;
+  document.querySelector("#briefPreview").innerHTML = `
+    <h3>Nut Graf</h3>
+    <p>${b.nut}</p>
+    <h3>Key Judgments</h3>
+    <ul>${b.judgments.map(j => `<li>${j}</li>`).join("")}</ul>
+    <h3>Action Directives</h3>
+    <ul>${b.directives.map(d => `<li>${d}</li>`).join("")}</ul>
+  `;
+}
+
+// ── Render: Loop Events ────────────────────────────────────────
+function renderLoopEvents() {
+  document.querySelector("#loopEvents").innerHTML = loopEvents.map(e => `
+    <div class="loop-event">
+      <strong>${e.title}</strong>
+      <span>${e.detail}</span>
+    </div>
+  `).join("");
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+function fakeHash() {
+  const alphabet = "abcdef0123456789";
+  let out = "";
+  for (let i = 0; i < 10; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return `${out.slice(0, 6)}...${out.slice(6)}`;
+}
+
+// ── SACS Compiler ──────────────────────────────────────────────
+function compileSacsCode() {
+  const ids = ["sacsSystem", "sacsDomain", "sacsRole", "sacsFunction", "sacsRisk", "sacsFailure"];
+  const values = ids.map(id => document.querySelector(`#${id}`).value);
+  const code = values.join("-");
+  document.querySelector("#sacsOutput").textContent = code;
+
+  // Update segment display
+  const segIds = ["segSystem", "segDomain", "segRole", "segFunction", "segRisk", "segFailure"];
+  segIds.forEach((segId, i) => {
+    document.querySelector(`#${segId}`).textContent = values[i];
+  });
+
+  // Routing logic
+  const risk = document.querySelector("#sacsRisk").value;
+  const route = risk === "C4"
+    ? "Director escalation, SRPE watchlist, Zero-Trust review"
+    : risk === "C3"
+      ? "Threat Fusion queue, analyst review"
+      : "Custodial Governance review, SRPE watchlist";
+  document.querySelector("#sacsRoute").textContent = route;
+}
+
+document.querySelector("#compileSacs").addEventListener("click", compileSacsCode);
+
+// ── Intake Form ────────────────────────────────────────────────
+document.querySelector("#intakeForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const source = document.querySelector("#sourceType").value;
+  const subject = document.querySelector("#subject").value.trim() || "Untitled packet";
+  const vector = document.querySelector("#vector").value;
+  const risk = document.querySelector("#riskLevel").value;
+
+  const riskCode = risk === "Critical" ? "C4" : risk === "High" ? "C3" : risk === "Low" ? "C1" : "C2";
+  const code = `CTS-${vector.slice(0, 3).toUpperCase()}-EXT-ROUTE-${riskCode}-FM-GAP`;
+  const hash = fakeHash();
+  const marker = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+
+  // Add to ledger
+  ledgerEntries.unshift([marker, source.includes("document") ? "Document" : "Incident", code, hash, "Anchored"]);
+  renderLedger();
+
+  // Update counter
+  const $count = document.querySelector("#ledgerCount");
+  $count.textContent = String(Number($count.textContent) + 1);
+
+  // Show packet result
+  document.querySelector("#packetResult").innerHTML = `
+    <div class="packet-row"><span>Subject</span><strong>${subject}</strong></div>
+    <div class="packet-row"><span>Source</span><strong>${source}</strong></div>
+    <div class="packet-row"><span>SHA-256 Anchor</span><strong>${hash}</strong></div>
+    <div class="packet-row"><span>SACS Code</span><strong style="color:var(--accent)">${code}</strong></div>
+    <div class="packet-row"><span>Ledger Marker</span><strong>${marker}</strong></div>
+    <div class="packet-row"><span>Route</span><strong>${risk === "Critical" ? "Director escalation" : "Fusion cell analyst queue"}</strong></div>
+  `;
+});
+
+// ── Simulate Telemetry ─────────────────────────────────────────
+document.querySelector("#simulateBtn").addEventListener("click", () => {
+  const $alertCount = document.querySelector("#alertCount");
+  $alertCount.textContent = String(Number($alertCount.textContent) + 1);
+
+  const next = (Math.random() * 0.035).toFixed(3);
+  document.querySelector("#loopScore").textContent = next;
+  document.querySelector("#loopVisualScore").textContent = next;
+
+  alerts.unshift({ level: "Moderate", text: "New dummy telemetry packet entered the fusion queue" });
+  renderAlerts();
+
+  activityLog.unshift({ text: "New telemetry simulation triggered", time: "now" });
+  renderActivity();
+});
+
+// ── Fusion Recalculate ─────────────────────────────────────────
+document.querySelector("#recalcFusion").addEventListener("click", () => {
+  const nodes = [...document.querySelectorAll(".fusion-node")];
+  const scores = nodes.map(node => {
+    const value = Math.floor(38 + Math.random() * 55);
+    node.dataset.score = value;
+    node.querySelector(".fusion-score").textContent = value;
+    node.querySelector(".fusion-fill").style.width = value + "%";
+    return [node.querySelector(".fusion-header strong").textContent, value];
+  }).sort((a, b) => b[1] - a[1]);
+  document.querySelector("#fusionSummary").textContent =
+    `${scores[0][0]} and ${scores[1][0]} vectors are currently driving the highest mock convergence score.`;
+});
+
+// ── Balance Loop ───────────────────────────────────────────────
+document.querySelector("#balanceLoop").addEventListener("click", () => {
+  const score = (Math.random() * 0.012).toFixed(3);
+  document.querySelector("#loopScore").textContent = score;
+  document.querySelector("#loopVisualScore").textContent = score;
+});
+
+// ── New Intake Dialog ──────────────────────────────────────────
+document.querySelector("#newIntakeBtn").addEventListener("click", () => {
+  document.querySelector("#intakeDialog").showModal();
+});
+
+document.querySelector("#intakeDialog").addEventListener("close", event => {
+  if (event.target.returnValue === "confirm") showView("intake");
+});
+
+// ── Global Search ──────────────────────────────────────────────
+document.querySelector("#globalSearch").addEventListener("input", event => {
+  const value = event.target.value.trim().toLowerCase();
+  if (!value) {
+    renderLedger(document.querySelector("[data-ledger-filter].active").dataset.ledgerFilter);
+    return;
+  }
+  const rows = ledgerEntries
+    .filter(e => e.join(" ").toLowerCase().includes(value))
+    .map(e => `
+      <tr>
+        <td style="font-family:var(--font-mono);font-size:12px">${e[0]}</td>
+        <td>${e[1]}</td>
+        <td><span class="pill">${e[2]}</span></td>
+        <td style="font-family:var(--font-mono);font-size:12px">${e[3]}</td>
+        <td>${e[4]}</td>
+      </tr>
+    `).join("");
+  document.querySelector("#ledgerRows").innerHTML = rows || `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">No records match "${value}".</td></tr>`;
+});
+
+// ── Protection Buttons ─────────────────────────────────────────
+document.querySelectorAll(".protection").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".protection").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  });
+});
+
+// ── Initialize ─────────────────────────────────────────────────
+renderAlerts();
+renderActivity();
+renderLedger();
+renderRisks();
+renderBriefs();
+renderLoopEvents();
+  </script>
+</body>
+</html>
