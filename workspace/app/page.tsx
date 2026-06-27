@@ -98,7 +98,9 @@ const priorityWeight = (p: string) => ({ CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1
 
 // ── VIEW METADATA ────────────────────────────────────────────
 const viewMeta: Record<string, { title: string; eyebrow: string }> = {
-  dashboard:  { title: 'Command Dashboard',           eyebrow: 'Intelligence Core' },
+  dashboard:  { title: 'Command Dashboard',           eyebrow: 'Phase I Prototype' },
+  intake:     { title: 'Intelligence Intake',          eyebrow: 'IINP' },
+  ledger:     { title: 'Provenance Ledger',            eyebrow: 'G-PCL' },
   vault:      { title: 'Document Vault',               eyebrow: 'Secure Manifest' },
   incidents:  { title: 'SACS Incident Logger',         eyebrow: 'S-SIE' },
   briefings:  { title: 'Intelligence Briefing Matrix', eyebrow: 'IBMx' },
@@ -253,7 +255,6 @@ export default function Page() {
   // ── FETCH / HYDRATE ──
   useEffect(() => {
     async function hydrate() {
-      // Load local storage first
       try {
         const sc = localStorage.getItem('cts_collections_v2');
         const sd = localStorage.getItem('cts_docs_v2');
@@ -266,12 +267,10 @@ export default function Page() {
         if (sa) setAuditLog(JSON.parse(sa));
       } catch (e) { console.error('Local hydration fault:', e); }
 
-      // Try Supabase, fall back to mock data
       try {
         const { data: dbBriefs } = await supabase.from('intelligence_briefings').select('*').order('created_at', { ascending: false });
         const { data: dbIncidents } = await supabase.from('sacs_incidents').select('*').order('created_at', { ascending: false });
-        
-        if (dbBriefs && dbBriefs.length > 0) {
+        if (dbBriefs) {
           setBriefingsArchive(dbBriefs.map(b => ({
             id: b.id, title: b.title, priority: b.priority, classification: b.classification,
             cycle: b.cycle, analyst: b.analyst, nutGraf: b.nut_graf, keyJudgments: b.key_judgments,
@@ -280,8 +279,7 @@ export default function Page() {
             tags: b.tags || [], isArchived: b.is_archived, timestamp: new Date(b.created_at).toLocaleString(),
           })));
         }
-        
-        if (dbIncidents && dbIncidents.length > 0) {
+        if (dbIncidents) {
           const mapped = dbIncidents.map(i => ({
             id: i.id, sacsCode: i.sacs_code, priority: i.priority, xAxis: i.x_axis, yAxis: i.y_axis,
             zAxis: i.z_axis, targetSubject: i.target_subject, clearanceTier: i.clearance_tier,
@@ -293,38 +291,14 @@ export default function Page() {
           setIncidents(mapped);
           const active = dbIncidents.filter((i: any) => !i.is_archived);
           setMetrics({
-            totalDocs: documentsVault.length, totalIncidents: active.length, totalBriefings: dbBriefs?.length || 0,
-            totalCases: caseStudies.length, openAlerts: active.filter((i: any) => i.status === 'Open').length,
+            totalDocs: 0, totalIncidents: active.length, totalBriefings: dbBriefs?.length || 0,
+            totalCases: 0, openAlerts: active.filter((i: any) => i.status === 'Open').length,
             highPriority: active.filter((i: any) => i.priority === 'HIGH' || i.priority === 'CRITICAL').length,
             criticalPriority: active.filter((i: any) => i.priority === 'CRITICAL').length,
             integrityLoop: 0.018, briefsPending: 0,
           });
-        } else {
-          // Use mock data when Supabase is empty or not configured
-          throw new Error('No data in Supabase, using mock data');
         }
-      } catch (fault) {
-        console.log('Using mock dashboard data:', fault);
-        const mockIncidents: SecurityIncident[] = [
-          { id: 'INC-001', sacsCode: 'JUD.POL.INI.INV.C.AU', priority: 'CRITICAL', xAxis: '2024-01-15', yAxis: 'King County', zAxis: 'Authority', targetSubject: 'Court filing delay', clearanceTier: 'TIER-3', scopeFlags: 'JUDICIAL', sensoryInput: 'Document review', perceptualPhenomenon: 'Procedural gap', environmentalContext: 'Legal system', status: 'Open', timestamp: '2024-01-15T10:30:00Z', attachedDocIds: [], tags: ['JUDICIAL', 'COURT'], isArchived: false },
-          { id: 'INC-002', sacsCode: 'OPS.NET.VAL.REP.M.DA', priority: 'HIGH', xAxis: '2024-01-14', yAxis: 'Digital', zAxis: 'Network', targetSubject: 'System access anomaly', clearanceTier: 'TIER-3', scopeFlags: 'CYBER', sensoryInput: 'Log analysis', perceptualPhenomenon: 'Unauthorized access', environmentalContext: 'Network', status: 'Open', timestamp: '2024-01-14T14:20:00Z', attachedDocIds: [], tags: ['CYBER', 'NETWORK'], isArchived: false },
-          { id: 'INC-003', sacsCode: 'LOG.DAT.INV.AUD.L.DL', priority: 'MEDIUM', xAxis: '2024-01-13', yAxis: 'Operations', zAxis: 'Data', targetSubject: 'Data reconciliation', clearanceTier: 'TIER-3', scopeFlags: 'LOGISTICS', sensoryInput: 'Audit trail', perceptualPhenomenon: 'Missing entry', environmentalContext: 'Records', status: 'Open', timestamp: '2024-01-13T09:15:00Z', attachedDocIds: [], tags: ['LOGISTICS', 'AUDIT'], isArchived: false },
-          { id: 'INC-004', sacsCode: 'SEC.POL.REP.INV.C.EX', priority: 'HIGH', xAxis: '2024-01-12', yAxis: 'Physical', zAxis: 'Security', targetSubject: 'Perimeter breach', clearanceTier: 'TIER-4', scopeFlags: 'PHYSICAL', sensoryInput: 'Sensor data', perceptualPhenomenon: 'Unauthorized entry', environmentalContext: 'Facility', status: 'Open', timestamp: '2024-01-12T22:45:00Z', attachedDocIds: [], tags: ['PHYSICAL', 'SECURITY'], isArchived: false },
-        ];
-        setIncidents(mockIncidents);
-        setMetrics({
-          totalDocs: 12,
-          totalIncidents: 4,
-          totalBriefings: 3,
-          totalCases: 2,
-          openAlerts: 4,
-          highPriority: 3,
-          criticalPriority: 1,
-          integrityLoop: 0.018,
-          briefsPending: 1,
-        });
-      }
-      
+      } catch (fault) { console.error('Cloud sync fault:', fault); }
       setInitialHydration(true);
       setIsLoading(false);
     }
@@ -652,44 +626,6 @@ export default function Page() {
   // ══════════════════════════════════════════════════════════
   return (
     <div className="app-shell">
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          body, html, #root { background: #FFF !important; color: #000 !important; width: 100%; }
-          header, .no-print, form, button, select, hr { display: none !important; }
-          #printable-briefing-sheet, .printable-incident-report {
-            border: none !important; padding: 0 !important; width: 100% !important;
-            max-width: 100% !important; box-shadow: none !important; margin: 0 !important;
-          }
-          .page-break { page-break-before: always; }
-          .incident-card { page-break-inside: avoid; }
-        }
-        .vault-split { display: flex; min-height: calc(100vh - 100px); gap: 0; }
-        .vault-feed { flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-right: 16px; }
-        .vault-viewer { width: 420px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; display: flex; flex-direction: column; overflow-y: auto; }
-        .vault-sidebar { width: 220px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px; overflow-y: auto; margin-right: 16px; }
-        .vault-sidebar-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .vault-nav-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 6px 8px; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 12px; text-align: left; font-family: var(--font-sans); }
-        .vault-nav-btn:hover { background: var(--surface-2); }
-        .vault-nav-btn.active { background: var(--surface-3); color: var(--text); font-weight: 600; }
-        .incident-split { display: flex; gap: 16px; }
-        .incident-form { width: 380px; flex-shrink: 0; }
-        .incident-list { flex: 1; display: flex; flex-direction: column; gap: 12px; }
-        .briefing-split { display: flex; gap: 16px; }
-        .briefing-form { width: 380px; flex-shrink: 0; }
-        .case-split { display: flex; gap: 16px; }
-        .case-form { width: 380px; flex-shrink: 0; }
-        .vault-doc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px; cursor: pointer; transition: border-color 0.1s ease; }
-        .vault-doc-card:hover { border-color: var(--border-hover); }
-        .vault-doc-card.selected { border: 2px solid var(--accent); }
-        .vault-doc-card.bulk-selected { border: 2px solid #7c3aed; }
-        .incident-card-item { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
-        .briefing-paper { background: var(--surface); border: 1px solid var(--border); padding: 40px; border-radius: 6px; width: 100%; max-width: 850px; margin: 0 auto; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-        .briefing-section { margin-bottom: 20px; }
-        .briefing-section h3 { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px 0; border-bottom: 1px solid var(--accent-soft); padding-bottom: 3px; }
-        .case-viewer { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 24px; flex: 1; overflow-y: auto; }
-        .audit-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; gap: 16px; align-items: flex-start; }
-      `}} />
-
       {/* ── COLLECTION MODAL ── */}
       {showNewCollection && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
@@ -732,6 +668,14 @@ export default function Page() {
           <button className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             <span>Dashboard</span>
+          </button>
+          <button className={`nav-item ${activeTab === 'intake' ? 'active' : ''}`} onClick={() => setActiveTab('intake')}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Intake</span>
+          </button>
+          <button className={`nav-item ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => setActiveTab('ledger')}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <span>Ledger</span>
           </button>
           <button className={`nav-item ${activeTab === 'vault' ? 'active' : ''}`} onClick={() => setActiveTab('vault')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -801,10 +745,28 @@ export default function Page() {
       {/* ── MAIN WORKSPACE ── */}
       <main className="workspace">
         <header className="topbar">
-          <div><p className="eyebrow">{meta.eyebrow}</p><h1>{meta.title}</h1></div>
+          <div className="topbar-left">
+            <p className="eyebrow">{meta.eyebrow}</p>
+            <h1>{meta.title}</h1>
+          </div>
+          <div className="top-actions">
+            <label className="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" placeholder="Search records..." />
+            </label>
+            <button className="btn-icon" title="Simulate new telemetry">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+            </button>
+            <button className="btn-primary" onClick={() => setActiveTab('intake')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+              New Intake
+            </button>
+          </div>
         </header>
 
         {activeTab === 'dashboard' && <DashboardView metrics={metrics} incidents={incidents} isLoading={isLoading} />}
+        {activeTab === 'intake' && <IntakeView addAudit={addAudit} incidents={incidents} setIncidents={setIncidents} />}
+        {activeTab === 'ledger' && <LedgerView incidents={incidents} documentsVault={documentsVault} briefingsArchive={briefingsArchive} />}
         {activeTab === 'sacs' && <SacsCompilerView />}
         {activeTab === 'fusion' && <FusionView incidents={incidents} />}
         {activeTab === 'risk' && <RiskView incidents={incidents} />}
@@ -1440,11 +1402,8 @@ export default function Page() {
 // ── DASHBOARD VIEW ───────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════
 function DashboardView({ metrics, incidents, isLoading }: { metrics: DashboardMetrics | null; incidents: SecurityIncident[]; isLoading: boolean }) {
-  if (isLoading) {
-    return <div className="card"><p style={{ color: 'var(--muted)' }}>Initializing dashboard...</p></div>;
-  }
-  if (!metrics) {
-    return <div className="card"><p style={{ color: 'var(--muted)' }}>No metrics available. Check Supabase connection or log some incidents.</p></div>;
+  if (isLoading || !metrics) {
+    return <div className="card"><p style={{ color: 'var(--muted)' }}>Loading live data from Supabase...</p></div>;
   }
   const recentIncidents = incidents.slice(0, 5);
   return (
@@ -1482,6 +1441,36 @@ function DashboardView({ metrics, incidents, isLoading }: { metrics: DashboardMe
             This pipeline shows the data flow from intake through analysis to briefing. Log incidents in the SACS Incident Logger to populate the metrics and recent activity feed.
           </p>
         </article>
+        
+        {/* Threat Radar - NEW */}
+        <article className="card">
+          <div className="card-header"><div><p className="eyebrow">Vector Mix</p><h2>Threat Domains</h2></div></div>
+          <div className="threat-radar" aria-label="Threat domain visualization">
+            <svg viewBox="0 0 200 200" className="radar-svg">
+              <polygon points="100,20 176,60 176,140 100,180 24,140 24,60" fill="none" stroke="var(--border)" strokeWidth="0.5"/>
+              <polygon points="100,40 156,68 156,132 100,160 44,132 44,68" fill="none" stroke="var(--border)" strokeWidth="0.5"/>
+              <polygon points="100,60 136,76 136,124 100,140 64,124 64,76" fill="none" stroke="var(--border)" strokeWidth="0.5"/>
+              <line x1="100" y1="20" x2="100" y2="180" stroke="var(--border)" strokeWidth="0.3"/>
+              <line x1="24" y1="60" x2="176" y2="140" stroke="var(--border)" strokeWidth="0.3"/>
+              <line x1="176" y1="60" x2="24" y2="140" stroke="var(--border)" strokeWidth="0.3"/>
+              <polygon points="100,32 162,66 148,138 52,130 36,72" fill="var(--accent)" fillOpacity="0.15" stroke="var(--accent)" strokeWidth="1.5"/>
+              <circle cx="100" cy="32" r="3" fill="var(--accent)"/>
+              <circle cx="162" cy="66" r="3" fill="var(--accent)"/>
+              <circle cx="148" cy="138" r="3" fill="var(--accent)"/>
+              <circle cx="52" cy="130" r="3" fill="var(--accent)"/>
+              <circle cx="36" cy="72" r="3" fill="var(--accent)"/>
+            </svg>
+            <div className="radar-labels">
+              <span className="rl-top">Cyber</span>
+              <span className="rl-right">EM/RF</span>
+              <span className="rl-bottom-right">Institutional</span>
+              <span className="rl-bottom-left">Physical</span>
+              <span className="rl-left">Identity</span>
+            </div>
+          </div>
+        </article>
+        
+        {/* Recent Activity */}
         <article className="card">
           <div className="card-header"><div><p className="eyebrow">Recent Activity</p><h2>Latest Incidents</h2></div></div>
           <ul className="feed-list">
@@ -1496,12 +1485,96 @@ function DashboardView({ metrics, incidents, isLoading }: { metrics: DashboardMe
             {recentIncidents.length === 0 && <li className="feed-item"><span>No incidents recorded yet. Use the SACS Incident Logger to create entries.</span></li>}
           </ul>
         </article>
+        
+        {/* Convergence Watch - NEW */}
+        <article className="card">
+          <div className="card-header"><div><p className="eyebrow">Current Alerts</p><h2>Convergence Watch</h2></div></div>
+          <ul className="alert-feed">
+            <li className="high">
+              <div>
+                <strong>High Priority</strong>
+                <span>Repeated authority-stratum gap across related case packets</span>
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Moderate Priority</strong>
+                <span>Cyber vector score rose after new device log intake</span>
+              </div>
+            </li>
+            <li className="high">
+              <div>
+                <strong>High Priority</strong>
+                <span>Institutional compression factor exceeds mock watch threshold</span>
+              </div>
+            </li>
+          </ul>
+        </article>
+        
         <article className="card span-2">
           <div className="card-header"><div><p className="eyebrow">Operations</p><h2>Division Readiness</h2></div></div>
           <div className="readiness-grid">
             <div className="readiness-item"><div className="readiness-info"><strong>Protective Intelligence</strong><span>58%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '58%' }}></div></div><small style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>Threat assessments, counter-influence analysis, identity protection</small></div>
             <div className="readiness-item"><div className="readiness-info"><strong>Custodial Governance</strong><span>72%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '72%' }}></div></div><small style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>Ledger integrity, SACS enforcement, provenance validation</small></div>
             <div className="readiness-item"><div className="readiness-info"><strong>Continuum Security</strong><span>43%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '43%' }}></div></div><small style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>EM spectrum defense, cybersecurity, zero-trust enforcement</small></div>
+          </div>
+        </article>
+        
+        {/* Activity Feed - NEW */}
+        <article className="card">
+          <div className="card-header"><div><p className="eyebrow">Activity</p><h2>Recent Events</h2></div></div>
+          <div className="activity-feed">
+            <div className="activity-item">
+              <div className="activity-dot"></div>
+              <span>Ledger anchor created for document packet</span>
+              <time>2m ago</time>
+            </div>
+            <div className="activity-item">
+              <div className="activity-dot"></div>
+              <span>SACS code compiled: CTS-GOV-AUTH-RESP-C2</span>
+              <time>8m ago</time>
+            </div>
+            <div className="activity-item">
+              <div className="activity-dot"></div>
+              <span>Fusion cell recalculation complete</span>
+              <time>14m ago</time>
+            </div>
+            <div className="activity-item">
+              <div className="activity-dot"></div>
+              <span>New intake from external agency report</span>
+              <time>22m ago</time>
+            </div>
+            <div className="activity-item">
+              <div className="activity-dot"></div>
+              <span>Zero-trust loop balanced</span>
+              <time>31m ago</time>
+            </div>
+            <div className="activity-item">
+              <div className="activity-dot"></div>
+              <span>Briefing matrix draft published</span>
+              <time>45m ago</time>
+            </div>
+          </div>
+        </article>
+      </div>
+        </article>
+        <article className="card">
+          <div className="card-header"><div><p className="eyebrow">Recent Activity</p><h2>Latest Incidents</h2></div></div>
+          <ul className="feed-list">
+            {recentIncidents.map(inc => (
+              <li key={inc.id} className={`feed-item ${inc.priority === 'CRITICAL' ? 'accent' : ''}`}>
+                <div><strong>{inc.priority}</strong><span>{inc.sacsCode}</span></div>
+              </li>
+            ))}
+            {recentIncidents.length === 0 && <li className="feed-item"><span>No incidents recorded</span></li>}
+          </ul>
+        </article>
+        <article className="card span-2">
+          <div className="card-header"><div><p className="eyebrow">Operations</p><h2>Division Readiness</h2></div></div>
+          <div className="readiness-grid">
+            <div className="readiness-item"><div className="readiness-info"><strong>Protective Intelligence</strong><span>58%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '58%' }}></div></div></div>
+            <div className="readiness-item"><div className="readiness-info"><strong>Custodial Governance</strong><span>72%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '72%' }}></div></div></div>
+            <div className="readiness-item"><div className="readiness-info"><strong>Continuum Security</strong><span>43%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '43%' }}></div></div></div>
           </div>
         </article>
       </div>
@@ -1592,13 +1665,13 @@ function FusionView({ incidents }: { incidents: SecurityIncident[] }) {
 // ══════════════════════════════════════════════════════════════
 function RiskView({ incidents }: { incidents: SecurityIncident[] }) {
   const [highOnly, setHighOnly] = useState(false);
-  
+
   // Dynamic pattern detection based on actual incidents
   const criticalCount = incidents.filter(i => i.priority === 'CRITICAL').length;
   const highCount = incidents.filter(i => i.priority === 'HIGH').length;
   const judicialIncidents = incidents.filter(i => i.sacsCode.includes('JUD')).length;
   const cyberIncidents = incidents.filter(i => i.tags.some(t => t.includes('CYBER') || t.includes('NET'))).length;
-  
+
   const patterns = [
     { title: 'Critical Authority Escalation', level: 'High', body: `${criticalCount} critical-priority incidents detected requiring immediate review.` },
     { title: 'High-Priority Cluster', level: highCount > 2 ? 'High' : 'Medium', body: `${highCount} high-priority incidents in active monitoring queue.` },
@@ -1607,7 +1680,6 @@ function RiskView({ incidents }: { incidents: SecurityIncident[] }) {
     { title: 'Evidence Integrity Check', level: 'Medium', body: 'Verifying all ledger entries have corresponding documentation.' },
     { title: 'Temporal Pattern Analysis', level: 'Low', body: 'Monitoring incident frequency for anomalous clustering.' },
   ].filter(p => !highOnly || p.level === 'High');
-  
   return (
     <div className="card">
       <div className="card-header">
@@ -1725,3 +1797,231 @@ function RoadmapView() {
     </div>
   );
 }
+
+// ══════════════════════════════════════════════════════════════
+// ── INTAKE VIEW ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+function IntakeView({ addAudit, incidents, setIncidents }: { 
+  addAudit: (action: string, targetId: string, targetType: string, detail: string) => void;
+  incidents: SecurityIncident[];
+  setIncidents: React.Dispatch<React.SetStateAction<SecurityIncident[]>>;
+}) {
+  const [sourceType, setSourceType] = useState('Vault document');
+  const [subject, setSubject] = useState('Institutional response anomaly');
+  const [vector, setVector] = useState('Institutional');
+  const [riskLevel, setRiskLevel] = useState('Moderate');
+  const [notes, setNotes] = useState('Mock source packet received for normalization and routing.');
+  const [packetResult, setPacketResult] = useState<any>(null);
+
+  const handleIntake = (e: React.FormEvent) => {
+    e.preventDefault();
+    const riskCode = riskLevel === 'Critical' ? 'C4' : riskLevel === 'High' ? 'C3' : riskLevel === 'Low' ? 'C1' : 'C2';
+    const vectorCode = vector.slice(0, 3).toUpperCase();
+    const sacsCode = `CTS-${vectorCode}-EXT-ROUTE-${riskCode}-FM-GAP`;
+    const hash = Math.random().toString(36).substring(2, 12);
+    const marker = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+
+    const newIncident: SecurityIncident = {
+      id: `INC-${Date.now()}`,
+      sacsCode,
+      priority: riskLevel === 'Critical' ? 'CRITICAL' : riskLevel === 'High' ? 'HIGH' : riskLevel === 'Low' ? 'LOW' : 'MEDIUM',
+      xAxis: marker,
+      yAxis: vector,
+      zAxis: sourceType,
+      targetSubject: subject,
+      clearanceTier: 'TIER-3',
+      scopeFlags: vector.toUpperCase(),
+      sensoryInput: 'Intake pipeline',
+      perceptualPhenomenon: notes,
+      environmentalContext: 'System intake',
+      status: 'Open',
+      timestamp: marker,
+      attachedDocIds: [],
+      tags: [vector.toUpperCase()],
+      isArchived: false,
+    };
+
+    setIncidents(prev => [newIncident, ...prev]);
+    addAudit('CREATE_INTAKE', newIncident.id, 'incident', `Intake created: ${subject} [${sacsCode}]`);
+
+    setPacketResult({
+      subject,
+      source: sourceType,
+      hash: `${hash.slice(0, 6)}...${hash.slice(6)}`,
+      sacsCode,
+      marker,
+      route: riskLevel === 'Critical' ? 'Director escalation' : 'Fusion cell analyst queue',
+    });
+  };
+
+  return (
+    <div className="split-layout">
+      <article className="card">
+        <div className="card-header">
+          <div>
+            <p className="eyebrow">IINP</p>
+            <h2>New Intelligence Intake</h2>
+          </div>
+        </div>
+        <form onSubmit={handleIntake} className="form-grid">
+          <div className="form-field">
+            <label>Source Type</label>
+            <select value={sourceType} onChange={e => setSourceType(e.target.value)}>
+              <option>Vault document</option>
+              <option>SACS incident log</option>
+              <option>EM/RF scan</option>
+              <option>Device log</option>
+              <option>External agency report</option>
+              <option>Witness statement</option>
+            </select>
+          </div>
+          <div className="form-field">
+            <label>Subject</label>
+            <input value={subject} onChange={e => setSubject(e.target.value)} />
+          </div>
+          <div className="form-field">
+            <label>Threat Vector</label>
+            <select value={vector} onChange={e => setVector(e.target.value)}>
+              <option>Institutional</option>
+              <option>Cyber</option>
+              <option>EM/RF</option>
+              <option>Identity</option>
+              <option>Physical</option>
+              <option>Psychological</option>
+            </select>
+          </div>
+          <div className="form-field">
+            <label>Risk Level</label>
+            <select value={riskLevel} onChange={e => setRiskLevel(e.target.value)}>
+              <option>Moderate</option>
+              <option>High</option>
+              <option>Critical</option>
+              <option>Low</option>
+            </select>
+          </div>
+          <div className="form-field full">
+            <label>Analyst Notes</label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+          <button type="submit" className="btn-primary full">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Run Intake Pipeline
+          </button>
+        </form>
+      </article>
+      
+      <article className="card">
+        <div className="card-header">
+          <div>
+            <p className="eyebrow">Pipeline Result</p>
+            <h2>Normalized Packet</h2>
+          </div>
+        </div>
+        <div className="packet-result">
+          {packetResult ? (
+            <>
+              <div className="packet-row"><span>Subject</span><strong>{packetResult.subject}</strong></div>
+              <div className="packet-row"><span>Source</span><strong>{packetResult.source}</strong></div>
+              <div className="packet-row"><span>SHA-256 Anchor</span><strong>{packetResult.hash}</strong></div>
+              <div className="packet-row"><span>SACS Code</span><strong style={{ color: 'var(--accent)' }}>{packetResult.sacsCode}</strong></div>
+              <div className="packet-row"><span>Ledger Marker</span><strong>{packetResult.marker}</strong></div>
+              <div className="packet-row"><span>Route</span><strong>{packetResult.route}</strong></div>
+            </>
+          ) : (
+            <div className="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>Submit the form to generate a mock hash, SACS code, ledger anchor, and routing decision.</p>
+            </div>
+          )}
+        </div>
+      </article>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── LEDGER VIEW ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+function LedgerView({ incidents, documentsVault, briefingsArchive }: {
+  incidents: SecurityIncident[];
+  documentsVault: LedgerDocument[];
+  briefingsArchive: IntelligenceBriefing[];
+}) {
+  const [filter, setFilter] = useState<'all' | 'Document' | 'Incident' | 'Brief'>('all');
+
+  const ledgerEntries = [
+    ...documentsVault.map(d => ({
+      marker: d.dateAdded,
+      type: 'Document' as const,
+      sacsCode: d.tags[0] || 'N/A',
+      hash: d.hash ? `${d.hash.slice(0, 6)}...${d.hash.slice(6, 12)}` : 'N/A',
+      status: 'Anchored',
+    })),
+    ...incidents.map(i => ({
+      marker: i.timestamp,
+      type: 'Incident' as const,
+      sacsCode: i.sacsCode,
+      hash: 'N/A',
+      status: i.status,
+    })),
+    ...briefingsArchive.map(b => ({
+      marker: b.timestamp,
+      type: 'Brief' as const,
+      sacsCode: b.tags[0] || 'N/A',
+      hash: 'N/A',
+      status: 'Published',
+    })),
+  ].sort((a, b) => new Date(b.marker).getTime() - new Date(a.marker).getTime());
+
+  const filtered = filter === 'all' ? ledgerEntries : ledgerEntries.filter(e => e.type === filter);
+
+  return (
+    <div className="card">
+      <div className="card-header">
+        <div>
+          <p className="eyebrow">G-PCL</p>
+          <h2>Global Provenance & Custodial Ledger</h2>
+        </div>
+        <div className="filter-tabs">
+          <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>All</button>
+          <button className={filter === 'Document' ? 'active' : ''} onClick={() => setFilter('Document')}>Documents</button>
+          <button className={filter === 'Incident' ? 'active' : ''} onClick={() => setFilter('Incident')}>Incidents</button>
+          <button className={filter === 'Brief' ? 'active' : ''} onClick={() => setFilter('Brief')}>Briefs</button>
+        </div>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>UTC Marker</th>
+              <th>Type</th>
+              <th>SACS Code</th>
+              <th>Hash</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map((entry, i) => (
+                <tr key={i}>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '12px' }}>{entry.marker}</td>
+                  <td>{entry.type}</td>
+                  <td><span className="pill">{entry.sacsCode}</span></td>
+                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '12px' }}>{entry.hash}</td>
+                  <td>{entry.status}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px' }}>
+                  No records match this filter.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+

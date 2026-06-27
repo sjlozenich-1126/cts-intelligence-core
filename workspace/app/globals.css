@@ -4,23 +4,34 @@
    CTS Intelligence Core — Monochrome Editorial + Blue Accent
    ============================================================ */
 
+@media print {
+  body, html, #root { background: #FFF !important; color: #000 !important; width: 100%; }
+  header, .no-print, form, button, select, hr { display: none !important; }
+  #printable-briefing-sheet, .printable-incident-report {
+    border: none !important; padding: 0 !important; width: 100% !important;
+    max-width: 100% !important; box-shadow: none !important; margin: 0 !important;
+  }
+  .page-break { page-break-before: always; }
+  .incident-card { page-break-inside: avoid; }
+}
+
 :root {
   --font-sans: var(--font-arimo);
   --font-mono: var(--font-jetbrains-mono);
 
-  /* Monochrome base — blue-tinted darker greys */
-  --bg: #B4BAC6;
-  --surface: #A6ADB9;
-  --surface-2: #98A0AF;
-  --surface-3: #8B94A5;
-  --border: #7A8494;
-  --border-hover: #6B7688;
+  /* Monochrome base */
+  --bg: #E0E0E0;
+  --surface: #C8C8C8;
+  --surface-2: #B8B8B8;
+  --surface-3: #AEAEAE;
+  --border: #A8A8A8;
+  --border-hover: #999999;
 
   /* Text hierarchy */
-  --text: #111827;
-  --text-secondary: #1F2937;
-  --muted: #4B5563;
-  --quiet: #6B7280;
+  --text: #1A1A1A;
+  --text-secondary: #333333;
+  --muted: #777777;
+  --quiet: #AAAAAA;
 
   /* Accent — CTS Blue */
   --accent: #066CF4;
@@ -718,9 +729,203 @@ tr:hover td { background: var(--surface-2); }
 .case-form { width: 380px; flex-shrink: 0; }
 .case-viewer { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 24px; flex: 1; overflow-y: auto; }
 
+.top-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.topbar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alert-feed {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.alert-feed li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.alert-feed li::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.alert-feed li.high::before {
+  background: var(--accent);
+}
+
+.packet-result {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.packet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.packet-row span {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.packet-row strong {
+  font-size: 12px;
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-state p {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 320px;
+  line-height: 1.5;
+}
+
 /* ── Audit ───────────────────────────────────────────────── */
 
 .audit-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; gap: 16px; align-items: flex-start; }
+
+/* ── Threat Radar ────────────────────────────────────────── */
+
+.threat-radar {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.radar-svg { width: 100%; height: 100%; }
+.radar-svg polygon { stroke: var(--border); }
+.radar-svg line { stroke: var(--border); }
+
+.radar-labels { position: absolute; inset: 0; pointer-events: none; }
+.radar-labels span { position: absolute; font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.rl-top { top: 2%; left: 50%; transform: translateX(-50%); }
+.rl-right { top: 34%; right: 0; }
+.rl-bottom-right { bottom: 10%; right: 6%; }
+.rl-bottom-left { bottom: 10%; left: 6%; }
+.rl-left { top: 34%; left: 0; }
+
+/* ── Activity Feed ───────────────────────────────────────── */
+
+.activity-feed { display: flex; flex-direction: column; gap: 8px; }
+
+.activity-item { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+
+.activity-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text);
+  flex-shrink: 0;
+}
+
+.activity-item span { color: var(--text-secondary); }
+
+.activity-item time {
+  margin-left: auto;
+  color: var(--quiet);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* ── Loop Layout (Zero Trust) ────────────────────────────── */
+
+.loop-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.loop-visual {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.loop-svg { width: 100%; height: 100%; }
+.loop-svg circle { stroke: var(--border); }
+
+.loop-center {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.loop-center strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+.loop-center span {
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.loop-events { display: grid; gap: 6px; }
+
+.loop-event {
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.loop-event strong { display: block; font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+.loop-event span { font-size: 10px; color: var(--muted); }
 
 /* ── Responsive ──────────────────────────────────────────── */
 
@@ -734,6 +939,8 @@ tr:hover td { background: var(--surface-2); }
   .span-2 { grid-column: span 2; }
   .vault-sidebar { display: none; }
   .vault-viewer { width: 320px; }
+  .loop-layout { grid-template-columns: 1fr; }
+  .threat-radar { max-width: 160px; }
 }
 
 @media (max-width: 768px) {
