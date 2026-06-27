@@ -1557,27 +1557,6 @@ function DashboardView({ metrics, incidents, isLoading }: { metrics: DashboardMe
           </div>
         </article>
       </div>
-        </article>
-        <article className="card">
-          <div className="card-header"><div><p className="eyebrow">Recent Activity</p><h2>Latest Incidents</h2></div></div>
-          <ul className="feed-list">
-            {recentIncidents.map(inc => (
-              <li key={inc.id} className={`feed-item ${inc.priority === 'CRITICAL' ? 'accent' : ''}`}>
-                <div><strong>{inc.priority}</strong><span>{inc.sacsCode}</span></div>
-              </li>
-            ))}
-            {recentIncidents.length === 0 && <li className="feed-item"><span>No incidents recorded</span></li>}
-          </ul>
-        </article>
-        <article className="card span-2">
-          <div className="card-header"><div><p className="eyebrow">Operations</p><h2>Division Readiness</h2></div></div>
-          <div className="readiness-grid">
-            <div className="readiness-item"><div className="readiness-info"><strong>Protective Intelligence</strong><span>58%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '58%' }}></div></div></div>
-            <div className="readiness-item"><div className="readiness-info"><strong>Custodial Governance</strong><span>72%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '72%' }}></div></div></div>
-            <div className="readiness-item"><div className="readiness-info"><strong>Continuum Security</strong><span>43%</span></div><div className="progress-track"><div className="progress-fill" style={{ width: '43%' }}></div></div></div>
-          </div>
-        </article>
-      </div>
     </>
   );
 }
@@ -2024,4 +2003,3 @@ function LedgerView({ incidents, documentsVault, briefingsArchive }: {
     </div>
   );
 }
-
